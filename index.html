@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India Happiness Index Trend</title>
+    <!-- Chart.js CDN for quick setup -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            margin-top: 50px; /* Push content down slightly */
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        p {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Happiness Index Trend: India (2018-2022)</h1>
+        <canvas id="happinessChart"></canvas>
+        <p>Data Source: World Happiness Report (Simulated for demonstration purposes)</p>
+    </div>
+
+    <script>
+        // THIS IS THE CRITICAL PART: REPLACE WITH ACTUAL API FETCH OR USE HARDCODED DATA
+        // Option 1: Hardcoded Data (Fastest for 4-hour deadline)
+        const happinessData = {
+            labels: ['2018', '2019', '2020', '2021', '2022'],
+            datasets: [{
+                label: 'Happiness Score',
+                data: [4.809, 4.015, 3.573, 3.819, 3.777], // Sample scores for India (approximate)
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: false
+            }]
+        };
+
+        // Option 2: API Fetch (If you have time and know the exact API endpoint & structure)
+        /*
+        async function fetchHappinessData() {
+            try {
+                // Replace with the actual World Happiness Report API endpoint for India & years
+                // This might require a specific country code or filter, check API docs
+                const response = await fetch('YOUR_WORLD_HAPPINESS_API_ENDPOINT_FOR_INDIA_2018_2022');
+                const data = await response.json();
+                
+                // Process 'data' to extract labels (years) and data points (scores)
+                // This part is highly dependent on the API's JSON structure.
+                // Example (you will need to adapt this significantly):
+                const labels = data.map(item => item.year); // Assuming data is an array of objects with 'year'
+                const scores = data.map(item => item.happiness_score); // Assuming data objects have 'happiness_score'
+
+                return {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Happiness Score',
+                        data: scores,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                };
+
+            } catch (error) {
+                console.error('Error fetching happiness data:', error);
+                // Fallback to hardcoded data if API fails, or show error message
+                return {
+                    labels: ['2018', '2019', '2020', '2021', '2022'],
+                    datasets: [{
+                        label: 'Happiness Score (Fallback)',
+                        data: [4.809, 4.015, 3.573, 3.819, 3.777], 
+                        borderColor: 'rgb(255, 99, 132)', // Different color for fallback
+                        tension: 0.1,
+                        fill: false
+                    }]
+                };
+            }
+        }
+        */
+
+        // Render the chart
+        document.addEventListener('DOMContentLoaded', async () => {
+            const ctx = document.getElementById('happinessChart').getContext('2d');
+            
+            // Choose the data source: hardcoded (for speed) or API fetch (if you have time)
+            // const chartData = await fetchHappinessData(); // For API option
+            const chartData = happinessData; // For hardcoded option (recommended for speed)
+
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'India Happiness Index Trend'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Happiness Score'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
