@@ -1,361 +1,541 @@
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dynamic DataViz Platform</title>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-start;
-                min-height: 100vh;
-                margin: 0;
-                background-color: #f4f4f4;
-                padding: 20px;
-                box-sizing: border-box;
-            }
-            .container {
-                background-color: #fff;
-                padding: 25px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                width: 90%;
-                max-width: 900px;
-                margin-top: 30px;
-            }
-            h1 {
-                color: #333;
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .controls {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 15px;
-                justify-content: center;
-                margin-bottom: 25px;
-            }
-            .control-group {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            label {
-                margin-bottom: 5px;
-                font-weight: bold;
-                color: #555;
-            }
-            select {
-                padding: 8px 12px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                background-color: #f9f9f9;
-                font-size: 1rem;
-                min-width: 180px;
-            }
-            canvas {
-                max-width: 100%;
-                height: auto;
-            }
-            p.source {
-                text-align: center;
-                color: #666;
-                margin-top: 20px;
-                font-size: 0.9em;
-            }
-            .loading-message, .error-message {
-                text-align: center;
-                color: #555;
-                font-style: italic;
-                margin-top: 20px;
-            }
-            .error-message {
-                color: #d9534f;
-                font-weight: bold;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Global Indicators Comparison</h1>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataViz Platform: Global Indicators</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1000px; /* Wider for more controls */
+            margin-top: 30px;
+            margin-bottom: 30px; /* Space between containers */
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9em;
+        }
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-size: 0.9rem;
+            min-width: 160px; /* Adjusted width for more dropdowns */
+            max-width: 220px;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        p.source {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+            font-size: 0.8em;
+        }
+        .loading-message, .error-message {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            margin-top: 20px;
+        }
+        .error-message {
+            color: #d9534f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Global Indicators Comparison</h1>
 
-            <div class="controls">
-                <div class="control-group">
-                    <label for="countrySelect">Select Country:</label>
-                    <select id="countrySelect">
-                        <option value="">Loading Countries...</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label for="indicatorSelect">Select Indicator:</label>
-                    <select id="indicatorSelect">
-                        <option value="">Loading Indicators...</option>
-                    </select>
-                </div>
+        <div class="controls">
+            <div class="control-group">
+                <label for="regionSelect">Filter by Region:</label>
+                <select id="regionSelect">
+                    <option value="all">All Regions</option>
+                    <!-- Options populated by JS -->
+                </select>
             </div>
-
-            <p class="loading-message" id="loadingMessage">Initializing platform...</p>
-            <p class="error-message" id="errorMessage" style="display:none;"></p>
-            <canvas id="comparisonChart" style="display:none;"></canvas>
-            <p class="source">Data Source: World Happiness Report (Simulated Local API) & World Bank (API)</p>
+            <div class="control-group">
+                <label for="incomeGroupSelect">Filter by Income Group:</label>
+                <select id="incomeGroupSelect">
+                    <option value="all">All Income Groups</option>
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="countrySelect">Select Country:</label>
+                <select id="countrySelect">
+                    <option value="">Loading Countries...</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="indicatorSelect">Select Indicator:</label>
+                <select id="indicatorSelect">
+                    <option value="">Loading Indicators...</option>
+                </select>
+            </div>
         </div>
 
-        <script>
-            const countrySelect = document.getElementById('countrySelect');
-            const indicatorSelect = document.getElementById('indicatorSelect');
-            const loadingMessage = document.getElementById('loadingMessage');
-            const errorMessage = document.getElementById('errorMessage');
-            const comparisonChartCanvas = document.getElementById('comparisonChart');
-            const ctx = comparisonChartCanvas.getContext('2d');
+        <p class="loading-message" id="loadingMessage">Initializing platform...</p>
+        <p class="error-message" id="errorMessage" style="display:none;"></p>
+        <canvas id="comparisonChart" style="display:none;"></canvas>
+        <p class="source">Data Source: World Happiness Report (Simulated Local API) & World Bank (API)</p>
+    </div>
 
-            let myChart; // To hold the Chart.js instance
+    <!-- New container for Regional Happiness Chart (Sprint 3) -->
+    <div class="container">
+        <h2>Happiness Distribution Across Regions (2022 Average)</h2>
+        <canvas id="regionHappinessChart"></canvas>
+        <p class="source">Data Source: World Happiness Report (Simulated Data)</p>
+    </div>
 
-            const WORLD_BANK_BASE_URL = "https://api.worldbank.org/v2";
-            const YEARS = ['2018', '2019', '2020', '2021', '2022']; // Fixed range for simplicity
 
-            // Curated list of World Bank indicators for the dropdown
-            const WB_INDICATORS = [
-                { code: 'NY.GDP.PCAP.CD', name: 'GDP per capita (current US$)' },
-                { code: 'SP.POP.TOTL', name: 'Population, total' },
-                { code: 'SE.ADT.LITR.ZS', name: 'Literacy rate, adult total (% of people ages 15 and above)' },
-                { code: 'SH.DYN.MORT', name: 'Mortality rate, under-5 (per 1,000 live births)' },
-                { code: 'SL.UEM.TOTL.ZS', name: 'Unemployment, total (% of total labor force)' }
-            ];
+    <script>
+        const regionSelect = document.getElementById('regionSelect');
+        const incomeGroupSelect = document.getElementById('incomeGroupSelect');
+        const countrySelect = document.getElementById('countrySelect');
+        const indicatorSelect = document.getElementById('indicatorSelect');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const comparisonChartCanvas = document.getElementById('comparisonChart');
+        const ctx = comparisonChartCanvas.getContext('2d');
 
-            let allHappinessData = []; // To store all happiness data from local JSON
-            let allWorldBankCountries = []; // To store all countries fetched from World Bank
+        let myChart; // To hold the Chart.js instance for comparison chart
+        let myRegionChart; // To hold the Chart.js instance for regional chart
 
-            // --- Fetch Countries from World Bank API ---
-            async function fetchCountries() {
-                try {
-                    const response = await fetch(`${WORLD_BANK_BASE_URL}/country?format=json&per_page=500`);
-                    const data = await response.json();
-                    if (data && data[1]) {
-                        allWorldBankCountries = data[1]
-                            .filter(c => c.region.value !== 'Aggregates' && c.name !== 'World' && c.iso2Code)
-                            .sort((a, b) => a.name.localeCompare(b.name));
+        const WORLD_BANK_BASE_URL = "https://api.worldbank.org/v2";
+        const YEARS = ['2018', '2019', '2020', '2021', '2022']; // Fixed range for simplicity
 
-                        countrySelect.innerHTML = '<option value="">-- Select Country --</option>';
-                        allWorldBankCountries.forEach(country => {
-                            const option = document.createElement('option');
-                            option.value = country.iso2Code;
-                            option.textContent = country.name;
-                            countrySelect.appendChild(option);
-                        });
-                        countrySelect.value = 'IN'; // Default to India
-                    }
-                } catch (error) {
-                    console.error('Error fetching countries:', error);
-                    errorMessage.textContent = 'Error loading countries from World Bank API. Please try again later.';
-                    errorMessage.style.display = 'block';
+        // Curated list of World Bank indicators for the dropdown
+        const WB_INDICATORS = [
+            { code: 'NY.GDP.PCAP.CD', name: 'GDP per capita (current US$)' },
+            { code: 'SP.POP.TOTL', name: 'Population, total' },
+            { code: 'SE.ADT.LITR.ZS', name: 'Literacy rate, adult total (% of people ages 15 and above)' },
+            { code: 'SH.DYN.MORT', name: 'Mortality rate, under-5 (per 1,000 live births)' },
+            { code: 'SL.UEM.TOTL.ZS', name: 'Unemployment, total (% of total labor force)' },
+            { code: 'EG.ELC.ACCS.ZS', name: 'Access to electricity (% of population)' },
+            { code: 'SM.POP.NETM', name: 'Net migration' },
+            { code: 'SH.STA.SUIC.P5', name: 'Suicide mortality rate (per 100,000 population)' }
+        ];
+
+        let allHappinessData = []; // To store all happiness data from local JSON
+        let allWorldBankCountries = []; // To store all countries fetched from World Bank
+        let allWorldBankRegions = []; // To store all regions fetched from World Bank
+        let allWorldBankIncomeGroups = []; // To store all income groups fetched from World Bank
+
+        // --- Fetch Countries, Regions, Income Groups from World Bank API ---
+        async function fetchWorldBankMetadata() {
+            try {
+                // Fetch Countries
+                const countryResponse = await fetch(`${WORLD_BANK_BASE_URL}/country?format=json&per_page=500`);
+                const countryData = await countryResponse.json();
+                if (countryData && countryData[1]) {
+                    allWorldBankCountries = countryData[1]
+                        .filter(c => c.region.value !== 'Aggregates' && c.name !== 'World' && c.iso2Code)
+                        .sort((a, b) => a.name.localeCompare(b.name));
                 }
+
+                // Fetch Regions
+                const regionResponse = await fetch(`${WORLD_BANK_BASE_URL}/region?format=json&per_page=500`);
+                const regionData = await regionResponse.json();
+                if (regionData && regionData[1]) {
+                    allWorldBankRegions = regionData[1]
+                        .filter(r => r.id !== '' && r.id !== 'NA') // Filter out empty/not applicable regions
+                        .sort((a, b) => a.value.localeCompare(b.value));
+                }
+
+                // Fetch Income Groups
+                const incomeResponse = await fetch(`${WORLD_BANK_BASE_URL}/incomeLevel?format=json&per_page=500`);
+                const incomeData = await incomeResponse.json();
+                if (incomeData && incomeData[1]) {
+                    allWorldBankIncomeGroups = incomeData[1]
+                        .filter(i => i.id !== '') // Filter out empty income levels
+                        .sort((a, b) => a.value.localeCompare(b.value));
+                }
+
+            } catch (error) {
+                console.error('Error fetching World Bank metadata:', error);
+                errorMessage.textContent = 'Error loading country/region/income data from World Bank API. Please try again later.';
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        // --- Populate Filter Dropdowns ---
+        function populateFilterDropdowns() {
+            // Populate Region Select
+            regionSelect.innerHTML = '<option value="all">All Regions</option>';
+            allWorldBankRegions.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region.id;
+                option.textContent = region.value;
+                regionSelect.appendChild(option);
+            });
+
+            // Populate Income Group Select
+            incomeGroupSelect.innerHTML = '<option value="all">All Income Groups</option>';
+            allWorldBankIncomeGroups.forEach(income => {
+                const option = document.createElement('option');
+                option.value = income.id;
+                option.textContent = income.value;
+                incomeGroupSelect.appendChild(option);
+            });
+        }
+
+        // --- Populate Country Dropdown based on filters ---
+        function populateCountryDropdown() {
+            const selectedRegion = regionSelect.value;
+            const selectedIncomeGroup = incomeGroupSelect.value;
+
+            let filteredCountries = allWorldBankCountries;
+
+            if (selectedRegion !== 'all') {
+                filteredCountries = filteredCountries.filter(c => c.region.id === selectedRegion);
+            }
+            if (selectedIncomeGroup !== 'all') {
+                filteredCountries = filteredCountries.filter(c => c.incomeLevel.id === selectedIncomeGroup);
             }
 
-            // --- Fetch Happiness Data from Local JSON ---
-            async function fetchAllHappinessData() {
-                try {
-                    const response = await fetch('happiness_data.json'); // Path to your local JSON
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    allHappinessData = await response.json();
-                    console.log("Loaded Happiness Data:", allHappinessData);
-                } catch (error) {
-                    console.error('Error fetching local happiness data:', error);
-                    errorMessage.textContent = 'Error loading happiness data from local file. Happiness data may be limited.';
-                    errorMessage.style.display = 'block';
-                    // Fallback if local JSON fails or is not found
-                    allHappinessData = []; // Ensure it's an empty array if loading fails
-                }
+            countrySelect.innerHTML = '<option value="">-- Select Country --</option>';
+            filteredCountries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.iso2Code;
+                option.textContent = country.name;
+                countrySelect.appendChild(option);
+            });
+
+            // Try to re-select previous country or default to India if available
+            const previousCountry = countrySelect.dataset.previousValue;
+            if (previousCountry && filteredCountries.some(c => c.iso2Code === previousCountry)) {
+                countrySelect.value = previousCountry;
+            } else if (filteredCountries.some(c => c.iso2Code === 'IN')) {
+                countrySelect.value = 'IN'; // Default to India if available
+            } else if (filteredCountries.length > 0) {
+                countrySelect.value = filteredCountries[0].iso2Code; // Default to first available
+            } else {
+                countrySelect.value = ''; // No country selected
             }
+            countrySelect.dataset.previousValue = countrySelect.value; // Store current selection
+        }
 
-            // --- Fetch World Bank Indicator Data ---
-            async function fetchWorldBankIndicatorData(countryCode, indicatorCode) {
-                const url = `${WORLD_BANK_BASE_URL}/country/${countryCode}/indicator/${indicatorCode}?format=json&date=${YEARS[0]}:${YEARS[YEARS.length - 1]}&per_page=100`;
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-
-                    if (data && data[1] && data[1].length > 0) {
-                        const rawData = data[1]
-                            .filter(item => YEARS.includes(item.date))
-                            .sort((a, b) => parseInt(a.date) - parseInt(b.date));
-
-                        return YEARS.map(year => {
-                            const item = rawData.find(d => d.date === year);
-                            return item && item.value !== null ? parseFloat(item.value) : null;
-                        });
-                    }
-                    return YEARS.map(() => null); // Return array of nulls if no data
-                } catch (error) {
-                    console.error(`Error fetching indicator ${indicatorCode} for ${countryCode}:`, error);
-                    return YEARS.map(() => null); // Return array of nulls on error
+        // --- Fetch Happiness Data from Local JSON ---
+        async function fetchAllHappinessData() {
+            try {
+                const response = await fetch('happiness_data.json'); // Path to your local JSON
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                allHappinessData = await response.json();
+                console.log("Loaded Happiness Data:", allHappinessData);
+            } catch (error) {
+                console.error('Error fetching local happiness data:', error);
+                errorMessage.textContent = 'Error loading happiness data from local file. Happiness data may be limited.';
+                errorMessage.style.display = 'block';
+                allHappinessData = []; // Ensure it's an empty array if loading fails
             }
+        }
 
-            // --- Update Chart Function ---
-            async function updateChart() {
-                const selectedCountryCode = countrySelect.value;
-                const selectedIndicatorCode = indicatorSelect.value;
+        // --- Fetch World Bank Indicator Data ---
+        async function fetchWorldBankIndicatorData(countryCode, indicatorCode) {
+            const url = `${WORLD_BANK_BASE_URL}/country/${countryCode}/indicator/${indicatorCode}?format=json&date=${YEARS[0]}:${YEARS[YEARS.length - 1]}&per_page=100`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
 
-                if (!selectedCountryCode || !selectedIndicatorCode) {
-                    if (myChart) myChart.destroy();
-                    comparisonChartCanvas.style.display = 'none';
-                    loadingMessage.textContent = 'Please select a country and an indicator.';
-                    loadingMessage.style.display = 'block';
-                    return;
+                if (data && data[1] && data[1].length > 0) {
+                    const rawData = data[1]
+                        .filter(item => YEARS.includes(item.date))
+                        .sort((a, b) => parseInt(a.date) - parseInt(b.date));
+
+                    return YEARS.map(year => {
+                        const item = rawData.find(d => d.date === year);
+                        return item && item.value !== null ? parseFloat(item.value) : null;
+                    });
                 }
+                return YEARS.map(() => null); // Return array of nulls if no data
+            } catch (error) {
+                console.error(`Error fetching indicator ${indicatorCode} for ${countryCode}:`, error);
+                return YEARS.map(() => null); // Return array of nulls on error
+            }
+        }
 
-                loadingMessage.textContent = `Loading data for ${countrySelect.options[countrySelect.selectedIndex].text}...`;
-                loadingMessage.style.display = 'block';
-                errorMessage.style.display = 'none';
+        // --- Update Comparison Chart Function ---
+        async function updateChart() {
+            const selectedCountryCode = countrySelect.value;
+            const selectedIndicatorCode = indicatorSelect.value;
+
+            if (!selectedCountryCode || !selectedIndicatorCode) {
+                if (myChart) myChart.destroy();
                 comparisonChartCanvas.style.display = 'none';
+                loadingMessage.textContent = 'Please select a country and an indicator to view comparison.';
+                loadingMessage.style.display = 'block';
+                return;
+            }
 
-                const countryName = countrySelect.options[countrySelect.selectedIndex].text;
-                const indicatorName = indicatorSelect.options[indicatorSelect.selectedIndex].text;
+            loadingMessage.textContent = `Loading data for ${countrySelect.options[countrySelect.selectedIndex].text}...`;
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            comparisonChartCanvas.style.display = 'none';
 
-                // Get Happiness Data for selected country from the expanded local JSON
-                const countryHappinessData = YEARS.map(year => {
-                    const entry = allHappinessData.find(d => d.iso2Code === selectedCountryCode && d.year === year);
-                    return entry ? entry.score : null;
+            const countryName = countrySelect.options[countrySelect.selectedIndex].text;
+            const indicatorName = indicatorSelect.options[indicatorSelect.selectedIndex].text;
+
+            // Get Happiness Data for selected country from the expanded local JSON
+            const countryHappinessData = YEARS.map(year => {
+                const entry = allHappinessData.find(d => d.iso2Code === selectedCountryCode && d.year === year);
+                return entry ? entry.score : null;
+            });
+
+            // Get World Bank Indicator Data
+            const worldBankIndicatorValues = await fetchWorldBankIndicatorData(selectedCountryCode, selectedIndicatorCode);
+
+            // Check if we have valid data for at least one series
+            const hasHappinessData = countryHappinessData.some(val => val !== null);
+            const hasIndicatorData = worldBankIndicatorValues.some(val => val !== null);
+
+            if (!hasHappinessData && !hasIndicatorData) {
+                if (myChart) myChart.destroy();
+                comparisonChartCanvas.style.display = 'none';
+                errorMessage.textContent = 'No data available for the selected country and indicator combination.';
+                errorMessage.style.display = 'block';
+                loadingMessage.style.display = 'none';
+                return;
+            }
+
+            if (myChart) {
+                myChart.destroy(); // Destroy existing chart before creating a new one
+            }
+
+            const datasets = [];
+            if (hasHappinessData) {
+                datasets.push({
+                    label: `Happiness Score (${countryName}) (Simulated Local)`,
+                    data: countryHappinessData,
+                    borderColor: 'rgb(75, 192, 192)', // Green line
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: false,
+                    yAxisID: 'y'
                 });
+            }
+            if (hasIndicatorData) {
+                datasets.push({
+                    label: `${indicatorName} (${countryName}) (World Bank API)`,
+                    data: worldBankIndicatorValues,
+                    borderColor: 'rgb(255, 99, 132)', // Red line
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1,
+                    fill: false,
+                    yAxisID: 'y1'
+                });
+            }
 
-                console.log("Country Happiness Data for", countryName, ":", countryHappinessData);
-
-                // Get World Bank Indicator Data
-                const worldBankIndicatorValues = await fetchWorldBankIndicatorData(selectedCountryCode, selectedIndicatorCode);
-                console.log("World Bank Indicator Data for", countryName, indicatorName, ":", worldBankIndicatorValues);
-
-                // Check if we have valid data for at least one series
-                const hasHappinessData = countryHappinessData.some(val => val !== null);
-                const hasIndicatorData = worldBankIndicatorValues.some(val => val !== null);
-
-                if (!hasHappinessData && !hasIndicatorData) {
-                    if (myChart) myChart.destroy();
-                    comparisonChartCanvas.style.display = 'none';
-                    errorMessage.textContent = 'No data available for the selected country and indicator combination.';
-                    errorMessage.style.display = 'block';
-                    loadingMessage.style.display = 'none';
-                    return;
-                }
-
-                if (myChart) {
-                    myChart.destroy(); // Destroy existing chart before creating a new one
-                }
-
-                const datasets = [];
-                if (hasHappinessData) {
-                    datasets.push({
-                        label: `Happiness Score (${countryName}) (Simulated Local)`,
-                        data: countryHappinessData,
-                        borderColor: 'rgb(75, 192, 192)', // Green line
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        tension: 0.1,
-                        fill: false,
-                        yAxisID: 'y'
-                    });
-                }
-                if (hasIndicatorData) {
-                    datasets.push({
-                        label: `${indicatorName} (${countryName}) (World Bank API)`,
-                        data: worldBankIndicatorValues,
-                        borderColor: 'rgb(255, 99, 132)', // Red line
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        tension: 0.1,
-                        fill: false,
-                        yAxisID: 'y1'
-                    });
-                }
-
-                myChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: YEARS,
-                        datasets: datasets
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: YEARS,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
                     },
-                    options: {
-                        responsive: true,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `${countryName}: Happiness Index vs. ${indicatorName}`
                         },
-                        plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
                             title: {
                                 display: true,
-                                text: `${countryName}: Happiness Index vs. ${indicatorName}`
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false
+                                text: 'Year'
                             }
                         },
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Year'
-                                }
-                            },
-                            y: { // Primary Y-axis for Happiness Score
-                                type: 'linear',
+                        y: { // Primary Y-axis for Happiness Score
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
                                 display: true,
-                                position: 'left',
-                                title: {
-                                    display: true,
-                                    text: 'Happiness Score'
-                                },
-                                beginAtZero: false
+                                text: 'Happiness Score'
                             },
-                            y1: { // Secondary Y-axis for World Bank Indicator
-                                type: 'linear',
+                            beginAtZero: false
+                        },
+                        y1: { // Secondary Y-axis for World Bank Indicator
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
                                 display: true,
-                                position: 'right',
-                                title: {
-                                    display: true,
-                                    text: indicatorName // Dynamic title for secondary axis
-                                },
-                                grid: {
-                                    drawOnChartArea: false, // Only draw grid lines for the first axis
-                                },
-                                beginAtZero: false
+                                text: indicatorName // Dynamic title for secondary axis
+                            },
+                            grid: {
+                                drawOnChartArea: false, // Only draw grid lines for the first axis
+                            },
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            loadingMessage.style.display = 'none';
+            comparisonChartCanvas.style.display = 'block';
+        }
+
+        // --- Regional Happiness Chart (Static for Sprint 3) ---
+        function renderRegionalHappinessChart() {
+            const regionCtx = document.getElementById('regionHappinessChart').getContext('2d');
+
+            // Simulated average happiness scores for regions (based on World Happiness Report trends)
+            const regionalData = {
+                labels: ['North America', 'Europe & Central Asia', 'East Asia & Pacific', 'Latin America & Caribbean', 'South Asia', 'Sub-Saharan Africa', 'Middle East & North Africa'],
+                datasets: [{
+                    label: 'Average Happiness Score (2022)',
+                    data: [7.0, 6.5, 5.8, 6.0, 4.5, 4.0, 5.2], // Simulated average scores
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(199, 199, 199, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            if (myRegionChart) {
+                myRegionChart.destroy();
+            }
+
+            myRegionChart = new Chart(regionCtx, {
+                type: 'bar',
+                data: regionalData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Happiness Distribution Across Regions (2022 Average)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Average Happiness Score'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Region'
                             }
                         }
                     }
-                });
+                }
+            });
+        }
 
-                loadingMessage.style.display = 'none';
-                comparisonChartCanvas.style.display = 'block';
-            }
 
-            // --- Initialization ---
-            async function initialize() {
-                loadingMessage.textContent = 'Initializing platform...';
-                await fetchCountries(); // Populates countrySelect
-                await fetchAllHappinessData(); // Populates allHappinessData
+        // --- Initialization ---
+        async function initialize() {
+            loadingMessage.textContent = 'Initializing platform...';
+            await fetchWorldBankMetadata(); // Fetch countries, regions, income levels
+            populateFilterDropdowns(); // Populate region and income dropdowns
+            populateCountryDropdown(); // Populate country dropdown based on default filters
+            await fetchAllHappinessData(); // Populates allHappinessData
 
-                // Populate Indicator Select
-                indicatorSelect.innerHTML = '<option value="">-- Select Indicator --</option>';
-                WB_INDICATORS.forEach(indicator => {
-                    const option = document.createElement('option');
-                    option.value = indicator.code;
-                    option.textContent = indicator.name;
-                    indicatorSelect.appendChild(option);
-                });
-                indicatorSelect.value = 'NY.GDP.PCAP.CD'; // Default to GDP per capita
+            // Populate Indicator Select
+            indicatorSelect.innerHTML = '<option value="">-- Select Indicator --</option>';
+            WB_INDICATORS.forEach(indicator => {
+                const option = document.createElement('option');
+                option.value = indicator.code;
+                option.textContent = indicator.name;
+                indicatorSelect.appendChild(option);
+            });
+            indicatorSelect.value = 'NY.GDP.PCAP.CD'; // Default to GDP per capita
 
-                // Add event listeners
-                countrySelect.addEventListener('change', updateChart);
-                indicatorSelect.addEventListener('change', updateChart);
+            // Add event listeners for filters and selectors
+            regionSelect.addEventListener('change', () => {
+                populateCountryDropdown();
+                updateChart(); // Update chart when country list changes (and country might change)
+            });
+            incomeGroupSelect.addEventListener('change', () => {
+                populateCountryDropdown();
+                updateChart(); // Update chart when country list changes (and country might change)
+            });
+            countrySelect.addEventListener('change', updateChart);
+            indicatorSelect.addEventListener('change', updateChart);
 
-                // Initial chart load
-                await updateChart(); // Await this to ensure all data is processed before hiding loading
-            }
+            // Initial chart load for dynamic comparison
+            await updateChart();
 
-            initialize();
-        </script>
-    </body>
-    </html>
+            // Render the static regional chart for Sprint 3
+            renderRegionalHappinessChart();
+        }
+
+        initialize();
+    </script>
+</body>
+</html>
