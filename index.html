@@ -1,150 +1,361 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>India Happiness Index Trend</title>
-    <!-- Chart.js CDN for quick setup -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .container {
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 800px;
-            margin-top: 50px; /* Push content down slightly */
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        canvas {
-            max-width: 100%;
-            height: auto;
-        }
-        p {
-            text-align: center;
-            color: #666;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Happiness Index Trend: India (2018-2022)</h1>
-        <canvas id="happinessChart"></canvas>
-        <p>Data Source: World Happiness Report (Simulated for demonstration purposes)</p>
-    </div>
-
-    <script>
-        // THIS IS THE CRITICAL PART: REPLACE WITH ACTUAL API FETCH OR USE HARDCODED DATA
-        // Option 1: Hardcoded Data (Fastest for 4-hour deadline)
-        const happinessData = {
-            labels: ['2018', '2019', '2020', '2021', '2022'],
-            datasets: [{
-                label: 'Happiness Score',
-                data: [4.809, 4.015, 3.573, 3.819, 3.777], // Sample scores for India (approximate)
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1,
-                fill: false
-            }]
-        };
-
-        // Option 2: API Fetch (If you have time and know the exact API endpoint & structure)
-        /*
-        async function fetchHappinessData() {
-            try {
-                // Replace with the actual World Happiness Report API endpoint for India & years
-                // This might require a specific country code or filter, check API docs
-                const response = await fetch('YOUR_WORLD_HAPPINESS_API_ENDPOINT_FOR_INDIA_2018_2022');
-                const data = await response.json();
-                
-                // Process 'data' to extract labels (years) and data points (scores)
-                // This part is highly dependent on the API's JSON structure.
-                // Example (you will need to adapt this significantly):
-                const labels = data.map(item => item.year); // Assuming data is an array of objects with 'year'
-                const scores = data.map(item => item.happiness_score); // Assuming data objects have 'happiness_score'
-
-                return {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Happiness Score',
-                        data: scores,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1,
-                        fill: false
-                    }]
-                };
-
-            } catch (error) {
-                console.error('Error fetching happiness data:', error);
-                // Fallback to hardcoded data if API fails, or show error message
-                return {
-                    labels: ['2018', '2019', '2020', '2021', '2022'],
-                    datasets: [{
-                        label: 'Happiness Score (Fallback)',
-                        data: [4.809, 4.015, 3.573, 3.819, 3.777], 
-                        borderColor: 'rgb(255, 99, 132)', // Different color for fallback
-                        tension: 0.1,
-                        fill: false
-                    }]
-                };
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dynamic DataViz Platform</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                min-height: 100vh;
+                margin: 0;
+                background-color: #f4f4f4;
+                padding: 20px;
+                box-sizing: border-box;
             }
-        }
-        */
+            .container {
+                background-color: #fff;
+                padding: 25px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                width: 90%;
+                max-width: 900px;
+                margin-top: 30px;
+            }
+            h1 {
+                color: #333;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+                justify-content: center;
+                margin-bottom: 25px;
+            }
+            .control-group {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            label {
+                margin-bottom: 5px;
+                font-weight: bold;
+                color: #555;
+            }
+            select {
+                padding: 8px 12px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                background-color: #f9f9f9;
+                font-size: 1rem;
+                min-width: 180px;
+            }
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+            p.source {
+                text-align: center;
+                color: #666;
+                margin-top: 20px;
+                font-size: 0.9em;
+            }
+            .loading-message, .error-message {
+                text-align: center;
+                color: #555;
+                font-style: italic;
+                margin-top: 20px;
+            }
+            .error-message {
+                color: #d9534f;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Global Indicators Comparison</h1>
 
-        // Render the chart
-        document.addEventListener('DOMContentLoaded', async () => {
-            const ctx = document.getElementById('happinessChart').getContext('2d');
-            
-            // Choose the data source: hardcoded (for speed) or API fetch (if you have time)
-            // const chartData = await fetchHappinessData(); // For API option
-            const chartData = happinessData; // For hardcoded option (recommended for speed)
+            <div class="controls">
+                <div class="control-group">
+                    <label for="countrySelect">Select Country:</label>
+                    <select id="countrySelect">
+                        <option value="">Loading Countries...</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="indicatorSelect">Select Indicator:</label>
+                    <select id="indicatorSelect">
+                        <option value="">Loading Indicators...</option>
+                    </select>
+                </div>
+            </div>
 
-            new Chart(ctx, {
-                type: 'line',
-                data: chartData,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'India Happiness Index Trend'
-                        }
+            <p class="loading-message" id="loadingMessage">Initializing platform...</p>
+            <p class="error-message" id="errorMessage" style="display:none;"></p>
+            <canvas id="comparisonChart" style="display:none;"></canvas>
+            <p class="source">Data Source: World Happiness Report (Simulated Local API) & World Bank (API)</p>
+        </div>
+
+        <script>
+            const countrySelect = document.getElementById('countrySelect');
+            const indicatorSelect = document.getElementById('indicatorSelect');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const comparisonChartCanvas = document.getElementById('comparisonChart');
+            const ctx = comparisonChartCanvas.getContext('2d');
+
+            let myChart; // To hold the Chart.js instance
+
+            const WORLD_BANK_BASE_URL = "https://api.worldbank.org/v2";
+            const YEARS = ['2018', '2019', '2020', '2021', '2022']; // Fixed range for simplicity
+
+            // Curated list of World Bank indicators for the dropdown
+            const WB_INDICATORS = [
+                { code: 'NY.GDP.PCAP.CD', name: 'GDP per capita (current US$)' },
+                { code: 'SP.POP.TOTL', name: 'Population, total' },
+                { code: 'SE.ADT.LITR.ZS', name: 'Literacy rate, adult total (% of people ages 15 and above)' },
+                { code: 'SH.DYN.MORT', name: 'Mortality rate, under-5 (per 1,000 live births)' },
+                { code: 'SL.UEM.TOTL.ZS', name: 'Unemployment, total (% of total labor force)' }
+            ];
+
+            let allHappinessData = []; // To store all happiness data from local JSON
+            let allWorldBankCountries = []; // To store all countries fetched from World Bank
+
+            // --- Fetch Countries from World Bank API ---
+            async function fetchCountries() {
+                try {
+                    const response = await fetch(`${WORLD_BANK_BASE_URL}/country?format=json&per_page=500`);
+                    const data = await response.json();
+                    if (data && data[1]) {
+                        allWorldBankCountries = data[1]
+                            .filter(c => c.region.value !== 'Aggregates' && c.name !== 'World' && c.iso2Code)
+                            .sort((a, b) => a.name.localeCompare(b.name));
+
+                        countrySelect.innerHTML = '<option value="">-- Select Country --</option>';
+                        allWorldBankCountries.forEach(country => {
+                            const option = document.createElement('option');
+                            option.value = country.iso2Code;
+                            option.textContent = country.name;
+                            countrySelect.appendChild(option);
+                        });
+                        countrySelect.value = 'IN'; // Default to India
+                    }
+                } catch (error) {
+                    console.error('Error fetching countries:', error);
+                    errorMessage.textContent = 'Error loading countries from World Bank API. Please try again later.';
+                    errorMessage.style.display = 'block';
+                }
+            }
+
+            // --- Fetch Happiness Data from Local JSON ---
+            async function fetchAllHappinessData() {
+                try {
+                    const response = await fetch('happiness_data.json'); // Path to your local JSON
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    allHappinessData = await response.json();
+                    console.log("Loaded Happiness Data:", allHappinessData);
+                } catch (error) {
+                    console.error('Error fetching local happiness data:', error);
+                    errorMessage.textContent = 'Error loading happiness data from local file. Happiness data may be limited.';
+                    errorMessage.style.display = 'block';
+                    // Fallback if local JSON fails or is not found
+                    allHappinessData = []; // Ensure it's an empty array if loading fails
+                }
+            }
+
+            // --- Fetch World Bank Indicator Data ---
+            async function fetchWorldBankIndicatorData(countryCode, indicatorCode) {
+                const url = `${WORLD_BANK_BASE_URL}/country/${countryCode}/indicator/${indicatorCode}?format=json&date=${YEARS[0]}:${YEARS[YEARS.length - 1]}&per_page=100`;
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data && data[1] && data[1].length > 0) {
+                        const rawData = data[1]
+                            .filter(item => YEARS.includes(item.date))
+                            .sort((a, b) => parseInt(a.date) - parseInt(b.date));
+
+                        return YEARS.map(year => {
+                            const item = rawData.find(d => d.date === year);
+                            return item && item.value !== null ? parseFloat(item.value) : null;
+                        });
+                    }
+                    return YEARS.map(() => null); // Return array of nulls if no data
+                } catch (error) {
+                    console.error(`Error fetching indicator ${indicatorCode} for ${countryCode}:`, error);
+                    return YEARS.map(() => null); // Return array of nulls on error
+                }
+            }
+
+            // --- Update Chart Function ---
+            async function updateChart() {
+                const selectedCountryCode = countrySelect.value;
+                const selectedIndicatorCode = indicatorSelect.value;
+
+                if (!selectedCountryCode || !selectedIndicatorCode) {
+                    if (myChart) myChart.destroy();
+                    comparisonChartCanvas.style.display = 'none';
+                    loadingMessage.textContent = 'Please select a country and an indicator.';
+                    loadingMessage.style.display = 'block';
+                    return;
+                }
+
+                loadingMessage.textContent = `Loading data for ${countrySelect.options[countrySelect.selectedIndex].text}...`;
+                loadingMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
+                comparisonChartCanvas.style.display = 'none';
+
+                const countryName = countrySelect.options[countrySelect.selectedIndex].text;
+                const indicatorName = indicatorSelect.options[indicatorSelect.selectedIndex].text;
+
+                // Get Happiness Data for selected country from the expanded local JSON
+                const countryHappinessData = YEARS.map(year => {
+                    const entry = allHappinessData.find(d => d.iso2Code === selectedCountryCode && d.year === year);
+                    return entry ? entry.score : null;
+                });
+
+                console.log("Country Happiness Data for", countryName, ":", countryHappinessData);
+
+                // Get World Bank Indicator Data
+                const worldBankIndicatorValues = await fetchWorldBankIndicatorData(selectedCountryCode, selectedIndicatorCode);
+                console.log("World Bank Indicator Data for", countryName, indicatorName, ":", worldBankIndicatorValues);
+
+                // Check if we have valid data for at least one series
+                const hasHappinessData = countryHappinessData.some(val => val !== null);
+                const hasIndicatorData = worldBankIndicatorValues.some(val => val !== null);
+
+                if (!hasHappinessData && !hasIndicatorData) {
+                    if (myChart) myChart.destroy();
+                    comparisonChartCanvas.style.display = 'none';
+                    errorMessage.textContent = 'No data available for the selected country and indicator combination.';
+                    errorMessage.style.display = 'block';
+                    loadingMessage.style.display = 'none';
+                    return;
+                }
+
+                if (myChart) {
+                    myChart.destroy(); // Destroy existing chart before creating a new one
+                }
+
+                const datasets = [];
+                if (hasHappinessData) {
+                    datasets.push({
+                        label: `Happiness Score (${countryName}) (Simulated Local)`,
+                        data: countryHappinessData,
+                        borderColor: 'rgb(75, 192, 192)', // Green line
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1,
+                        fill: false,
+                        yAxisID: 'y'
+                    });
+                }
+                if (hasIndicatorData) {
+                    datasets.push({
+                        label: `${indicatorName} (${countryName}) (World Bank API)`,
+                        data: worldBankIndicatorValues,
+                        borderColor: 'rgb(255, 99, 132)', // Red line
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1,
+                        fill: false,
+                        yAxisID: 'y1'
+                    });
+                }
+
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: YEARS,
+                        datasets: datasets
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
                             title: {
                                 display: true,
-                                text: 'Happiness Score'
+                                text: `${countryName}: Happiness Index vs. ${indicatorName}`
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
                             }
                         },
-                        x: {
-                            title: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Year'
+                                }
+                            },
+                            y: { // Primary Y-axis for Happiness Score
+                                type: 'linear',
                                 display: true,
-                                text: 'Year'
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Happiness Score'
+                                },
+                                beginAtZero: false
+                            },
+                            y1: { // Secondary Y-axis for World Bank Indicator
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: indicatorName // Dynamic title for secondary axis
+                                },
+                                grid: {
+                                    drawOnChartArea: false, // Only draw grid lines for the first axis
+                                },
+                                beginAtZero: false
                             }
                         }
                     }
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+                });
+
+                loadingMessage.style.display = 'none';
+                comparisonChartCanvas.style.display = 'block';
+            }
+
+            // --- Initialization ---
+            async function initialize() {
+                loadingMessage.textContent = 'Initializing platform...';
+                await fetchCountries(); // Populates countrySelect
+                await fetchAllHappinessData(); // Populates allHappinessData
+
+                // Populate Indicator Select
+                indicatorSelect.innerHTML = '<option value="">-- Select Indicator --</option>';
+                WB_INDICATORS.forEach(indicator => {
+                    const option = document.createElement('option');
+                    option.value = indicator.code;
+                    option.textContent = indicator.name;
+                    indicatorSelect.appendChild(option);
+                });
+                indicatorSelect.value = 'NY.GDP.PCAP.CD'; // Default to GDP per capita
+
+                // Add event listeners
+                countrySelect.addEventListener('change', updateChart);
+                indicatorSelect.addEventListener('change', updateChart);
+
+                // Initial chart load
+                await updateChart(); // Await this to ensure all data is processed before hiding loading
+            }
+
+            initialize();
+        </script>
+    </body>
+    </html>
